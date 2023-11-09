@@ -1,23 +1,16 @@
-import keras
-from keras.datasets import cifar10
-from keras.preprocessing.image import ImageDataGenerator
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation, Flatten, Conv2D, MaxPooling2D
-import matplotlib.pyplot as plt
 import tensorflow as tf
+from keras.datasets import cifar100
+from keras.models import Sequential
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Activation, Dropout
 
-class AiCnnModel:
-    def __init__(self, x_train, y_train, x_test, y_test):
-        self.x_train = x_train
-        self.y_train = y_train
-        self.x_test = x_test
-        self.y_test = y_test
-        self.num_classes = 10
-        self.batch_size = 32
+class CIFARModel:
+    def __init__(self, num_classes=100, batch_size=32):
+        self.num_classes = num_classes
+        self.batch_size = batch_size
         self.model = None
 
     def load_data(self):
-        (self.x_train, self.y_train), (self.x_test, self.y_test) = cifar10.load_data()
+        (self.x_train, self.y_train), (self.x_test, self.y_test) = cifar100.load_data()
 
     def preprocess_data(self):
         self.y_train = tf.keras.utils.to_categorical(self.y_train, self.num_classes)
@@ -46,90 +39,24 @@ class AiCnnModel:
         )
 
 if __name__ == '__main__':
-    (x_train, y_train), (x_test, y_test) = cifar10.load_data()
+    cifar100_model = CIFARModel(num_classes=100, batch_size=32)
+    cifar100_model.load_data()
+    cifar100_model.preprocess_data()
 
-model1_layers = [
-    # First Convolutional Layer: 32 filters, 3x3 size, 'same' padding, input shape based on x_train
-    Conv2D(32, (3, 3), padding='same', input_shape=x_train.shape[1:]),
-    # ReLU activation for non-linearity
-    Activation('relu'),
-    # Second Convolutional Layer: 32 filters, 3x3 size
-    Conv2D(32, (3, 3)),
-    # ReLU activation
-    Activation('relu'),
-    # Max-pooling with 2x2 pool size
-    MaxPooling2D(pool_size=(2, 2)),
-    # Dropout layer with a rate of 0.25 for regularization
-    Dropout(0.25),
-    # Flatten the feature maps for the fully connected layers
-    Flatten(),
-    # First Fully Connected Layer: 256 neurons
-    Dense(256),
-    # ReLU activation
-    Activation('relu'),
-    # Another dropout layer with a rate of 0.5
-    Dropout(0.5),
-    # Output Layer: 10 neurons for 10 classes
-    Dense(10),
-    
-    Activation('softmax')  # Softmax activation for multiclass classification
-]
+    model_layers = [
+        Conv2D(32, (3, 3), padding='same', input_shape=cifar100_model.x_train.shape[1:]),
+        Activation('relu'),
+        Conv2D(32, (3, 3)),
+        Activation('relu'),
+        MaxPooling2D(pool_size=(2, 2)),
+        Dropout(0.25),
+        Flatten(),
+        Dense(512),
+        Activation('relu'),
+        Dropout(0.5),
+        Dense(cifar100_model.num_classes),
+        Activation('softmax')
+    ]
 
-
-model2_layers = [
-    Conv2D(32, (3, 3), padding='same', strides=(2, 2), input_shape=x_train.shape[1:]),
-    Activation('relu'),
-    Conv2D(32, (3, 3)),
-    Activation('relu'),
-    MaxPooling2D(pool_size=(2, 2)),
-    Dropout(0.5),
-    Conv2D(64, (3, 3), padding='same'),
-    Activation('relu'),
-    Conv2D(64, (3, 3)),
-    Activation('relu'),
-    MaxPooling2D(pool_size=(2, 2)),
-    Dropout(0.25),
-    Flatten(),
-    Dense(512),
-    Activation('relu'),
-    Dropout(0.5),
-    Dense(10),
-    Activation('softmax')
-]
-
-model3_layers = [
-    Conv2D(32, (3, 3), padding='same', input_shape=x_train.shape[1:]),
-    Activation('relu'),
-    Conv2D(32, (3, 3)),
-    MaxPooling2D(pool_size=(2, 2)),
-    Dropout(0.25),
-    Conv2D(64, (3, 3), padding='same'),
-    Activation('relu'),
-    Conv2D(64, (3, 3)),
-    MaxPooling2D(pool_size=(2, 2)),
-    Dropout(0.25),
-    Flatten(),
-    Dense(512),
-    Dense(10),
-    Activation('softmax')
-]
-
-model1 = AiCnnModel(x_train, y_train, x_test, y_test)
-model1.load_data()
-model1.preprocess_data()
-model1.build_model(model1_layers)
-model1.compile_and_train(tf.keras.optimizers.RMSprop(learning_rate=0.0005), epochs=5)
-
-'''
-model2 = AiCnnModel(x_train, y_train, x_test, y_test)
-model2.load_data()
-model2.preprocess_data()
-model2.build_model(model2_layers)
-model2.compile_and_train(tf.keras.optimizers.RMSprop(lr=0.0005), epochs=15)
-
-model3 = AiCnnModel(x_train, y_train, x_test, y_test)
-model3.load_data()
-model3.preprocess_data()
-model3.build_model(model3_layers)
-model3.compile_and_train(tf.keras.optimizers.RMSprop(lr=0.0005), epochs=15)
-'''
+    cifar100_model.build_model(model_layers)
+    cifar100_model.compile_and_train(tf.keras.optimizers.RMSprop(learning_rate=0.0005), epochs=5)
