@@ -10,7 +10,7 @@ elif os.name == 'nt':
     os.system('cls')
 
 
-data = yf.download("TSLA", start="2023-10-01", end="2023-10-30")
+data = yf.download("TSLA", start="2023-10-25", end="2023-10-30")
 print(data)
 
 tsla = yf.Ticker("TSLA")
