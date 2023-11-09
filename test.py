@@ -1,67 +1,101 @@
 import tensorflow as tf
-from tensorflow import keras
-import keras_tuner as kt
+from keras.datasets import cifar100
+from keras.models import Sequential
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Activation, Dropout
+import numpy as np
 
-(img_train, label_train), (img_test, label_test) = keras.datasets.fashion_mnist.load_data()
+class CIFARModel:
+    def __init__(self, num_classes=100, batch_size=32):
+        self.num_classes = num_classes
+        self.batch_size = batch_size
+        self.model = None
+        self.x_train = None
+        self.y_train = None
+        self.x_test = None
+        self.y_test = None
 
-# Normalize pixel values between 0 and 1
-img_train = img_train.astype('float32') / 255.0
-img_test = img_test.astype('float32') / 255.0
+    def load_data(self):
+        (self.x_train, self.y_train), (self.x_test, self.y_test) = cifar100.load_data()
 
-def model_builder(hp):
-  model = keras.Sequential()
-  model.add(keras.layers.Flatten(input_shape=(28, 28)))
+    def preprocess_data(self):
+        self.y_train = tf.keras.utils.to_categorical(self.y_train, self.num_classes)
+        self.y_test = tf.keras.utils.to_categorical(self.y_test, self.num_classes)
+        self.x_train = self.x_train.astype('float32') / 255
+        self.x_test = self.x_test.astype('float32') / 255
 
-  # Tune the number of units in the first Dense layer
-  # Choose an optimal value between 32-512
-  hp_units = hp.Int('units', min_value=32, max_value=512, step=32)
-  model.add(keras.layers.Dense(units=hp_units, activation='relu'))
-  model.add(keras.layers.Dense(10))
+    def build_model(self, layers):
+        self.model = Sequential(layers)
+        self.model.summary()
 
-  # Tune the learning rate for the optimizer
-  # Choose an optimal value from 0.01, 0.001, or 0.0001
-  hp_learning_rate = hp.Choice('learning_rate', values=[1e-2, 1e-3, 1e-4])
+    def compile_and_train(self, optimizer, epochs):
+        self.model.compile(
+            loss='categorical_crossentropy',
+            optimizer=optimizer,
+            metrics=['accuracy']
+        )
 
-  model.compile(optimizer=keras.optimizers.Adam(learning_rate=hp_learning_rate),
-                loss=keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-                metrics=['accuracy'])
+        self.model.fit(
+            self.x_train,
+            self.y_train,
+            batch_size=self.batch_size,
+            epochs=epochs,
+            validation_data=(self.x_test, self.y_test),
+            shuffle=True
+        )
 
-  return model
+    def evaluate(self):
+        return self.model.evaluate(self.x_test, self.y_test)
 
+def grid_search():
+    # Define a list of hyperparameter configurations to test
+    hyperparameter_configs = [
+    {"learning_rate": 0.001, "batch_size": 32, "num_layers": 3},
+    {"learning_rate": 0.01, "batch_size": 64, "num_layers": 4},
+    {"learning_rate": 0.001, "batch_size": 64, "num_layers": 3},
+    {"learning_rate": 0.01, "batch_size": 32, "num_layers": 4},
+    {"learning_rate": 0.0001, "batch_size": 64, "num_layers": 3},
+    {"learning_rate": 0.0001, "batch_size": 32, "num_layers": 4},
+    {"learning_rate": 0.001, "batch_size": 128, "num_layers": 3},
+    {"learning_rate": 0.01, "batch_size": 128, "num_layers": 4},
+        # Add more configurations here
+    ]
 
-tuner = kt.Hyperband(model_builder,
-                     objective='val_accuracy',
-                     max_epochs=10,
-                     factor=3,
-                     directory='my_dir',
-                     project_name='intro_to_kt')
+    results = []
 
+    for config in hyperparameter_configs:
+        model = CIFARModel(num_classes=100, batch_size=config["batch_size"])
+        model.load_data()
+        model.preprocess_data()
+        
+        model_layers = [
+            Conv2D(32, (3, 3), padding='same', input_shape=model.x_train.shape[1:]),
+            Activation('relu'),
+            Conv2D(32, (3, 3)),
+            Activation('relu'),
+            MaxPooling2D(pool_size=(2, 2)),
+            Dropout(0.25),
+            Flatten(),
+            Dense(512),
+            Activation('relu'),
+            Dropout(0.5),
+            Dense(model.num_classes),
+            Activation('softmax')
+        ]
+        
+        model.build_model(model_layers)
+        
+        optimizer = tf.keras.optimizers.RMSprop(learning_rate=config["learning_rate"])
+        model.compile_and_train(optimizer, epochs=1)
+        
+        # Evaluate the model and store the results
+        evaluation_result = model.evaluate()
+        results.append({"config": config, "evaluation_result": evaluation_result})
 
-stop_early = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=5)
+    # After testing all configurations, analyze and compare the results
+    for result in results:
+        config = result["config"]
+        evaluation_result = result["evaluation_result"]
+        print(f"Configuration: {config}, Evaluation Result: {evaluation_result}")
 
-tuner.search(img_train, label_train, epochs=50, validation_split=0.2, callbacks=[stop_early])
-
-# Get the optimal hyperparameters
-best_hps=tuner.get_best_hyperparameters(num_trials=1)[0]
-
-print(f"""
-The hyperparameter search is complete. The optimal number of units in the first densely-connected
-layer is {best_hps.get('units')} and the optimal learning rate for the optimizer
-is {best_hps.get('learning_rate')}.
-""")
-
-# Build the model with the optimal hyperparameters and train it on the data for 50 epochs
-model = tuner.hypermodel.build(best_hps)
-history = model.fit(img_train, label_train, epochs=50, validation_split=0.2)
-
-val_acc_per_epoch = history.history['val_accuracy']
-best_epoch = val_acc_per_epoch.index(max(val_acc_per_epoch)) + 1
-print('Best epoch: %d' % (best_epoch,))
-
-hypermodel = tuner.hypermodel.build(best_hps)
-
-# Retrain the model
-hypermodel.fit(img_train, label_train, epochs=best_epoch, validation_split=0.2)
-
-eval_result = hypermodel.evaluate(img_test, label_test)
-print("[test loss, test accuracy]:", eval_result)
+if __name__ == '__main__':
+    grid_search()
