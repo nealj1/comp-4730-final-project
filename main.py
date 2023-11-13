@@ -11,6 +11,7 @@ class CIFARModel:
 
     def load_data(self):
         (self.x_train, self.y_train), (self.x_test, self.y_test) = cifar100.load_data()
+        print(f'{self.y_train[0]}')
 
     def preprocess_data(self):
         self.y_train = tf.keras.utils.to_categorical(self.y_train, self.num_classes)
