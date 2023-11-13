@@ -131,17 +131,18 @@ plot_class_distribution(class_distribution_test, 'Class Distribution in the Test
 
 
 # Plot superclass distribution in the training set
-superclass_distribution_train = get_superclass_distribution(y_train, class_labels)
+superclass_distribution_train = get_superclass_distribution(y_train, superclass_labels)
 plot_superclass_distribution(superclass_distribution_train, 'Superclass Distribution in the Training Set', 'green')
 
 # Plot superclass distribution in the testing set
-superclass_distribution_test = get_superclass_distribution(y_test, class_labels)
+superclass_distribution_test = get_superclass_distribution(y_test, superclass_labels)
 plot_superclass_distribution(superclass_distribution_test, 'Superclass Distribution in the Testing Set', 'red')
 '''
 
 # Print unique superclass values
-unique_superclasses = set(class_labels)
-print("Unique Superclasses:", unique_superclasses)
+unique_superclasses = set(superclass_labels)
+num_unique_classes = len(unique_superclasses)
+print("Unique Superclasses:",num_unique_classes, unique_superclasses)
 
 
 from keras.datasets import cifar100
@@ -150,6 +151,9 @@ from keras.datasets import cifar100
 (_, y_train_fine), (_, _) = cifar100.load_data(label_mode='fine')  # Fine-grained labels
 (_, y_train_coarse), (_, _) = cifar100.load_data(label_mode='coarse')  # Coarse-grained labels
 
+# Print the first 10 examples
+print(y_train_coarse[:1])
+'''
 # Print examples with both fine-grained and coarse-grained labels
 for i in range(len(y_train_fine)):
     fine_grained_label = y_train_fine[i][0]
@@ -158,3 +162,6 @@ for i in range(len(y_train_fine)):
     fine_grained_class_name = class_labels[fine_grained_label]
     coarse_grained_superclass_name = superclass_labels[coarse_grained_label]
     print(f"Example {i + 1}: Fine-grained class: {fine_grained_class_name.ljust(20)} Superclass: {coarse_grained_superclass_name}")
+'''
+
+
