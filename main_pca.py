@@ -94,7 +94,6 @@ x_train = x_train/255.0
 np.min(x_train), np.max(x_train)
 x_train.shape
 
-
 #create PCA method
 pca_cifar = PCA(n_components = 2)
 principalComponents_cifar = pca_cifar.fit_transform(df_cifar.iloc[:, :-1])
@@ -122,9 +121,8 @@ sns.scatterplot(
 #variance of principal components
 print('Explained Variation per Principal Component: {}'.format(pca_cifar.explained_variance_ratio_))
 
-# Create a 3D scatter plot
-from mpl_toolkits.mplot3d import Axes3D
 
+# Create a 3D scatter plot
 fig = plt.figure(figsize=(12, 8))
 ax = fig.add_subplot(111, projection='3d')
 
