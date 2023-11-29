@@ -1,3 +1,9 @@
+'''
+https://www.kaggle.com/code/adtysregita/pca-application-using-cifar10-dataset
+https://towardsdatascience.com/pca-in-a-single-line-of-code-ed79ae42059b
+
+'''
+
 import numpy as np
 import pandas as pd
 from sklearn.decomposition import PCA
