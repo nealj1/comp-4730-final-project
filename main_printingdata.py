@@ -153,7 +153,7 @@ from keras.datasets import cifar100
 
 # Print the first 10 examples
 print(y_train_coarse[:1])
-'''
+
 # Print examples with both fine-grained and coarse-grained labels
 for i in range(len(y_train_fine)):
     fine_grained_label = y_train_fine[i][0]
@@ -162,6 +162,6 @@ for i in range(len(y_train_fine)):
     fine_grained_class_name = class_labels[fine_grained_label]
     coarse_grained_superclass_name = superclass_labels[coarse_grained_label]
     print(f"Example {i + 1}: Fine-grained class: {fine_grained_class_name.ljust(20)} Superclass: {coarse_grained_superclass_name}")
-'''
+
 
 

@@ -49,14 +49,26 @@ class CIFARModel:
 def grid_search():
     # Define a list of hyperparameter configurations to test
     hyperparameter_configs = [
-    {"learning_rate": 0.001, "batch_size": 32, "num_layers": 3},
-    {"learning_rate": 0.01, "batch_size": 64, "num_layers": 4},
-    {"learning_rate": 0.001, "batch_size": 64, "num_layers": 3},
+    {"learning_rate": 0.01, "batch_size": 32, "num_layers": 3},
+    {"learning_rate": 0.01, "batch_size": 64, "num_layers": 3},
+    {"learning_rate": 0.01, "batch_size": 128, "num_layers": 3},
     {"learning_rate": 0.01, "batch_size": 32, "num_layers": 4},
-    {"learning_rate": 0.0001, "batch_size": 64, "num_layers": 3},
-    {"learning_rate": 0.0001, "batch_size": 32, "num_layers": 4},
-    {"learning_rate": 0.001, "batch_size": 128, "num_layers": 3},
+    {"learning_rate": 0.01, "batch_size": 64, "num_layers": 4},
     {"learning_rate": 0.01, "batch_size": 128, "num_layers": 4},
+    
+    {"learning_rate": 0.001, "batch_size": 32, "num_layers": 3},
+    {"learning_rate": 0.001, "batch_size": 64, "num_layers": 3},
+    {"learning_rate": 0.001, "batch_size": 128, "num_layers": 3},
+    {"learning_rate": 0.001, "batch_size": 32, "num_layers": 4},
+    {"learning_rate": 0.001, "batch_size": 64, "num_layers": 4},
+    {"learning_rate": 0.001, "batch_size": 128, "num_layers": 4},
+    
+    {"learning_rate": 0.0001, "batch_size": 32, "num_layers": 3},
+    {"learning_rate": 0.0001, "batch_size": 64, "num_layers": 3},
+    {"learning_rate": 0.0001, "batch_size": 128, "num_layers": 3},
+    {"learning_rate": 0.0001, "batch_size": 32, "num_layers": 4},
+    {"learning_rate": 0.0001, "batch_size": 64, "num_layers": 4},
+    {"learning_rate": 0.0001, "batch_size": 128, "num_layers": 4},
         # Add more configurations here
     ]
 
