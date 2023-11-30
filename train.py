@@ -35,8 +35,8 @@ from keras.preprocessing.image import ImageDataGenerator
 
 
 def preprocess_data(x_train, y_train, x_test, y_test):
-    y_train = tf.keras.utils.to_categorical(y_train, 100)
-    y_test = tf.keras.utils.to_categorical(y_test, 100)
+    # y_train = tf.keras.utils.to_categorical(y_train, 100)
+    # y_test = tf.keras.utils.to_categorical(y_test, 100)
     x_train = x_train.astype('float32') / 255
     x_test = x_test.astype('float32') / 255
     
@@ -50,22 +50,22 @@ except ModuleNotFoundError:
     exit()
 
 network = Network()
-model = network.build()
+model = network.build(10)
 
 model.summary()
 
 (x_train, y_train), (x_test, y_test) = cifar100.load_data()
 
 x_train, y_train, x_test, y_test = preprocess_data(x_train, y_train, x_test, y_test)
-datagen = ImageDataGenerator(
-    horizontal_flip=True,
-    zoom_range=0.2
-)
+# datagen = ImageDataGenerator(
+#     horizontal_flip=True,
+#     # zoom_range=0.2
+# )
 
 # Create augmented data generator
-train_generator = datagen.flow(x_train, y_train, batch_size=64)
+# train_generator = datagen.flow(x_train, y_train, batch_size=512)
 
 
-model.compile(loss='categorical_crossentropy', optimizer=tf.keras.optimizers.Adam(), metrics='accuracy')
+model.compile(loss='sparse_categorical_crossentropy', optimizer=tf.keras.optimizers.SGD(learning_rate=0.003, momentum=0.9), metrics='accuracy')
 
-model.fit(train_generator , epochs=50, validation_data=(x_test, y_test))
+model.fit(x_train, y_train , epochs=10, validation_data=(x_test, y_test), batch_size=512)

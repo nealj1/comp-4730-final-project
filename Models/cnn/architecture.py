@@ -19,7 +19,7 @@ class Network():
         model = Model(inputs=inputs, outputs=outputs, name="CNN")
         return model
     
-    def conv_block(self, block_input, num_filters, kernel_size, strides=2   , padding="same"):
+    def conv_block(self, block_input, num_filters, kernel_size, strides=2  , padding="same"):
         x = block_input 
         
         x = layers.Conv2D(num_filters, kernel_size=kernel_size, strides=strides, padding=padding, activation="relu")(x)
