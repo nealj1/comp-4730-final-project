@@ -48,23 +48,37 @@ except ModuleNotFoundError:
     exit()
 
 network = Network()
-model = network.build(10)
+model = network.build()
 
 model.summary()
-
 (x_train, y_train), (x_test, y_test) = cifar100.load_data()
 
 x_train, y_train, x_test, y_test = preprocess_data(x_train, y_train, x_test, y_test)
-# datagen = ImageDataGenerator(
-#     horizontal_flip=True,
-#     # zoom_range=0.2
-# )
+datagen = ImageDataGenerator(
+    horizontal_flip=True,
+    # zoom_range=0.2
+)
 
 # Create augmented data generator
-# train_generator = datagen.flow(x_train, y_train, batch_size=512)
+train_generator = datagen.flow(x_train, y_train, batch_size=64)
+testing_generator = datagen.flow(x_test, y_test, batch_size=64)
 
 
 model.compile(loss='sparse_categorical_crossentropy',
-              optimizer=tf.keras.optimizers.SGD(learning_rate=0.003, momentum=0.9), metrics='accuracy')
+              optimizer=tf.keras.optimizers.Adam(learning_rate=0.0001), metrics='accuracy')
 
-model.fit(x_train, y_train, epochs=10, validation_data=(x_test, y_test), batch_size=512)
+history = model.fit(x_train, y_train, epochs=50, validation_data=testing_generator, batch_size=512, shuffle=True)
+
+training_loss = history.history["loss"]
+testing_loss = history.history["val_loss"]
+
+epochs = range(1, len(training_loss) + 1)
+
+plt.figure(figsize=(12,6))
+plt.plot(epochs, training_loss, 'bo-', label='Training Loss')
+plt.plot(epochs, testing_loss, 'ro-', label='Testing Loss')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+plt.savefig(os.path.join(model_save_path, 'losscurves.png'))
+plt.show()
