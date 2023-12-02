@@ -1,74 +1,144 @@
-import tensorflow as tf
-from keras.datasets import cifar100
+from keras.datasets import cifar10
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
+
+(x_train, y_train), (x_test, y_test) = cifar10.load_data()
+
+print('Traning data shape:', x_train.shape)
+print('Testing data shape:', x_test.shape)
+
+y_train.shape,y_test.shape
+
+# Find the unique numbers from the train labels
+classes = np.unique(y_train)
+nClasses = len(classes)
+print('Total number of outputs : ', nClasses)
+print('Output classes : ', classes)
+
+label_dict = {
+ 0: 'airplane',
+ 1: 'automobile',
+ 2: 'bird',
+ 3: 'cat',
+ 4: 'deer',
+ 5: 'dog',
+ 6: 'frog',
+ 7: 'horse',
+ 8: 'ship',
+ 9: 'truck',
+}
+
+plt.figure(figsize=[5,5])
+
+# Display the first image in training data
+plt.subplot(121)
+curr_img = np.reshape(x_train[0], (32,32,3))
+plt.imshow(curr_img)
+print(plt.title("(Label: " + str(label_dict[y_train[0][0]]) + ")"))
+
+# Display the first image in testing data
+plt.subplot(122)
+curr_img = np.reshape(x_test[0],(32,32,3))
+plt.imshow(curr_img)
+print(plt.title("(Label: " + str(label_dict[y_test[0][0]]) + ")"))
+plt.show()
+
+np.min(x_train),np.max(x_train)
+
+x_train = x_train/255.0
+
+np.min(x_train),np.max(x_train)
+
+x_train.shape
+
+x_train_flat = x_train.reshape(-1,3072)
+
+feat_cols = ['pixel'+str(i) for i in range(x_train_flat.shape[1])]
+
+df_cifar = pd.DataFrame(x_train_flat,columns=feat_cols)
+
+df_cifar['label'] = y_train
+print('Size of the dataframe: {}'.format(df_cifar.shape))
+
+df_cifar.head()
+
+pca_cifar = PCA(n_components=2)
+principalComponents_cifar = pca_cifar.fit_transform(df_cifar.iloc[:,:-1])
+
+principal_cifar_Df = pd.DataFrame(data = principalComponents_cifar
+             , columns = ['principal component 1', 'principal component 2'])
+principal_cifar_Df['y'] = y_train
+
+principal_cifar_Df.head()
+
+print('Explained variation per principal component: {}'.format(pca_cifar.explained_variance_ratio_))
+
+
+import seaborn as sns
+plt.figure(figsize=(16,10))
+sns.scatterplot(
+    x="principal component 1", y="principal component 2",
+    hue="y",
+    palette=sns.color_palette("hls", 10),
+    data=principal_cifar_Df,
+    legend="full",
+    alpha=0.3
+)
+
+plt.show()
+
+
+x_test = x_test/255.0
+x_test = x_test.reshape(-1,32,32,3)
+x_test_flat = x_test.reshape(-1,3072)
+pca = PCA(0.9)
+pca.fit(x_train_flat)
+PCA(copy=True, iterated_power='auto', n_components=0.9, random_state=None,
+  svd_solver='auto', tol=0.0, whiten=False)
+pca.n_components_
+
+train_img_pca = pca.transform(x_train_flat)
+test_img_pca = pca.transform(x_test_flat)
+
 from keras.models import Sequential
-from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Activation, Dropout
-from keras.preprocessing.image import ImageDataGenerator
+from keras.layers import Dense
+from keras.utils import np_utils
+from keras.optimizers import RMSprop
 
-class CIFARModel:
-    def __init__(self, num_classes=100, batch_size=32):
-        self.num_classes = num_classes
-        self.batch_size = batch_size
-        self.model = None
+y_train = np_utils.to_categorical(y_train)
+y_test = np_utils.to_categorical(y_test)
 
-    def load_data(self):
-        (self.x_train, self.y_train), (self.x_test, self.y_test) = cifar100.load_data()
+batch_size = 128
+num_classes = 10
+epochs = 20
 
-    def preprocess_data(self):
-        self.y_train = tf.keras.utils.to_categorical(self.y_train, self.num_classes)
-        self.y_test = tf.keras.utils.to_categorical(self.y_test, self.num_classes)
-        self.x_train = self.x_train.astype('float32') / 255
-        self.x_test = self.x_test.astype('float32') / 255
+model = Sequential()
+model.add(Dense(1024, activation='relu', input_shape=(99,)))
+model.add(Dense(1024, activation='relu'))
+model.add(Dense(512, activation='relu'))
+model.add(Dense(256, activation='relu'))
+model.add(Dense(num_classes, activation='softmax'))
 
-    def build_model(self, layers):
-        self.model = Sequential(layers)
-        self.model.summary()
+model.summary()
 
-    def compile_and_train(self, optimizer, epochs):
-        datagen = ImageDataGenerator(
-            rotation_range=40,
-            width_shift_range=0.2,
-            height_shift_range=0.2,
-            shear_range=0.2,
-            zoom_range=0.2,
-            horizontal_flip=True,
-            fill_mode='nearest'
-        )
+model.compile(loss='categorical_crossentropy',
+              optimizer=RMSprop(),
+              metrics=['accuracy'])
 
-        datagen.fit(self.x_train)
+history = model.fit(train_img_pca, y_train,batch_size=batch_size,epochs=epochs,verbose=1,
+                    validation_data=(test_img_pca, y_test))
 
-        self.model.compile(
-            loss='categorical_crossentropy',
-            optimizer=optimizer,
-            metrics=['accuracy']
-        )
+model = Sequential()
+model.add(Dense(1024, activation='relu', input_shape=(3072,)))
+model.add(Dense(1024, activation='relu'))
+model.add(Dense(512, activation='relu'))
+model.add(Dense(256, activation='relu'))
+model.add(Dense(num_classes, activation='softmax'))
+model.compile(loss='categorical_crossentropy',
+              optimizer=RMSprop(),
+              metrics=['accuracy'])
 
-        self.model.fit(
-            datagen.flow(self.x_train, self.y_train, batch_size=self.batch_size),
-            steps_per_epoch=len(self.x_train) // self.batch_size,
-            epochs=epochs,
-            validation_data=(self.x_test, self.y_test),
-            shuffle=True
-        )
-
-if __name__ == '__main__':
-    cifar100_model = CIFARModel(num_classes=100, batch_size=32)
-    cifar100_model.load_data()
-    cifar100_model.preprocess_data()
-
-    model_layers = [
-        Conv2D(32, (3, 3), padding='same', input_shape=cifar100_model.x_train.shape[1:]),
-        Activation('relu'),
-        Conv2D(32, (3, 3)),
-        Activation('relu'),
-        MaxPooling2D(pool_size=(2, 2)),
-        Dropout(0.25),
-        Flatten(),
-        Dense(512),
-        Activation('relu'),
-        Dropout(0.5),
-        Dense(cifar100_model.num_classes),
-        Activation('softmax')
-    ]
-
-    cifar100_model.build_model(model_layers)
-    cifar100_model.compile_and_train(tf.keras.optimizers.RMSprop(learning_rate=0.0005), epochs=5)
+history = model.fit(x_train_flat, y_train,batch_size=batch_size,epochs=epochs,verbose=1,
+                    validation_data=(x_test_flat, y_test))

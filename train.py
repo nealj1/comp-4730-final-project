@@ -32,8 +32,6 @@ from keras.preprocessing.image import ImageDataGenerator
 
 
 def preprocess_data(x_train, y_train, x_test, y_test):
-    # y_train = tf.keras.utils.to_categorical(y_train, 100)
-    # y_test = tf.keras.utils.to_categorical(y_test, 100)
     x_train = x_train.astype('float32') / 255
     x_test = x_test.astype('float32') / 255
 
@@ -55,7 +53,11 @@ model.summary()
 
 x_train, y_train, x_test, y_test = preprocess_data(x_train, y_train, x_test, y_test)
 datagen = ImageDataGenerator(
-    horizontal_flip=True,
+    # horizontal_flip=True,
+    # vertical_flip=True,
+    # shear_range=0.2,
+    # brightness_range=[0.5, 1.5],
+    # rotation_range=10,
     # zoom_range=0.2
 )
 
@@ -65,9 +67,9 @@ testing_generator = datagen.flow(x_test, y_test, batch_size=64)
 
 
 model.compile(loss='sparse_categorical_crossentropy',
-              optimizer=tf.keras.optimizers.Adam(learning_rate=0.0001), metrics='accuracy')
+              optimizer=tf.keras.optimizers.Adam(learning_rate=0.01), metrics='accuracy')
 
-history = model.fit(x_train, y_train, epochs=100, validation_data=testing_generator, batch_size=512, shuffle=True)
+history = model.fit(x_train, y_train, epochs=25, validation_data=testing_generator, batch_size=128, shuffle=True)
 
 training_loss = history.history["loss"]
 testing_loss = history.history["val_loss"]

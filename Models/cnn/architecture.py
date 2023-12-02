@@ -2,7 +2,7 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers, Model
 
-kernal_size = 3
+kernel_size = 3
 
 class Network():
     
@@ -10,20 +10,10 @@ class Network():
         # kernal_size = 3
         inputs = layers.Input(shape=(32,32,3)) 
         
-        
-        x = layers.Conv2D(64, 3, activation='relu', kernel_initializer="he_normal", kernel_regularizer=keras.regularizers.l2(l=0.01), padding='same')(inputs)
-        x = self.conv_block(x, num_filters=64, kernel_size=3)
-        
-        x = layers.Conv2D(128, 2, activation='relu', padding='same')(x)
-        x = layers.Conv2D(128, 2, activation='relu', padding='same')(x)     
-        x = self.conv_block(x, num_filters=128, kernel_size=2)
-        
-
-        x = layers.Conv2D(256, 3, activation='relu', padding='same')(x)
-        x = layers.Conv2D(256, 3, activation='relu', padding='same')(x)
-        x = self.conv_block(x, num_filters=256, kernel_size=3)
-        
-        
+        x = self.conv_block(inputs, num_filters=16, kernel_size=kernel_size)
+        x = self.conv_block(x, num_filters=32, kernel_size=kernel_size)
+        x = self.conv_block(x, num_filters=64, kernel_size=kernel_size)
+        x = self.conv_block(x, num_filters=128, kernel_size=kernel_size) 
         x = layers.Flatten()(x)
         x = layers.Dense(512, activation='relu')(x)
         x = layers.BatchNormalization()(x)

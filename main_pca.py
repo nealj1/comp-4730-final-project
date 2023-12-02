@@ -142,3 +142,75 @@ ax.set_zlabel('Class Label')
 ax.set_title('3D Scatter Plot of CIFAR-100 with PCA')
 
 plt.show()
+
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.optimizers import RMSprop
+import keras.utils as np_utils
+
+#speed up testing process with PCA
+#reshape dataset and determine number of variance
+x_test = x_test/255.0
+x_test = x_test.reshape(-1, 32, 32, 3)
+x_test_flat = x_test.reshape(-1, 3072)
+
+pca = PCA(0.99)
+pca.fit(x_train_flat)
+PCA(copy = True, iterated_power = 'auto', n_components = 0.99, random_state = None, svd_solver = 'auto', tol = 0.0, whiten = False)
+pca.n_components_
+
+
+
+train_img_pca = pca.transform(x_train_flat)
+test_img_pca = pca.transform(x_test_flat)
+
+y_train = np_utils.to_categorical(y_train)
+y_test = np_utils.to_categorical(y_test)
+
+
+
+#define batch size, number of classes, and epoch
+input_shape = (658,)
+batch_size = 128
+num_classes = 100
+epochs = 50
+
+#define Sequential model
+model = Sequential()
+model.add(Dense(512, activation = 'relu', input_shape = input_shape))
+model.add(Dense(256, activation = 'relu'))
+model.add(Dense(num_classes, activation = 'softmax'))
+
+model.summary()
+
+
+
+#compile and train the model
+model.compile(loss = 'categorical_crossentropy',
+              optimizer = RMSprop(),
+              metrics = ['accuracy'])
+
+history = model.fit(train_img_pca,
+                    y_train,
+                    batch_size = batch_size,
+                    epochs = epochs,
+                    verbose = 1,
+                    validation_data = (test_img_pca, y_test))
+
+
+#compile and train full dataset
+model = Sequential()
+model.add(Dense(1024, activation = 'relu', input_shape = (3072,)))
+model.add(Dense(1024, activation = 'relu'))
+model.add(Dense(512, activation = 'relu'))
+model.add(Dense(256, activation = 'relu'))
+model.add(Dense(num_classes, activation = 'softmax'))
+model.compile(loss = 'categorical_crossentropy',
+              optimizer = RMSprop(),
+              metrics = ['accuracy'])
+
+history = model.fit(x_train_flat,
+                    y_train,batch_size = batch_size,
+                    epochs = epochs,
+                    verbose = 1,
+                    validation_data = (x_test_flat, y_test))
