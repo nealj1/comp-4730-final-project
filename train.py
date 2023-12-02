@@ -67,18 +67,36 @@ testing_generator = datagen.flow(x_test, y_test, batch_size=64)
 model.compile(loss='sparse_categorical_crossentropy',
               optimizer=tf.keras.optimizers.Adam(learning_rate=0.0001), metrics='accuracy')
 
-history = model.fit(x_train, y_train, epochs=50, validation_data=testing_generator, batch_size=512, shuffle=True)
+history = model.fit(x_train, y_train, epochs=100, validation_data=testing_generator, batch_size=512, shuffle=True)
 
 training_loss = history.history["loss"]
 testing_loss = history.history["val_loss"]
+training_accuracy = history.history["accuracy"]
+testing_accuracy = history.history["val_accuracy"]
 
 epochs = range(1, len(training_loss) + 1)
 
-plt.figure(figsize=(12,6))
-plt.plot(epochs, training_loss, 'bo-', label='Training Loss')
-plt.plot(epochs, testing_loss, 'ro-', label='Testing Loss')
+# Plot loss curves
+plt.subplot(3, 1, 1)
+
+plt.plot(epochs, training_loss, 'b.-', label='Training Loss')
+plt.plot(epochs, testing_loss, 'r.-', label='Testing Loss')
+plt.title('Plot Loss')
 plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend()
+
+plt.subplot(3, 1, 3)
+plt.ylim(top=1.2)
+plt.plot(epochs, training_accuracy, 'b.-', label='Training Loss')
+plt.plot(epochs, testing_accuracy, 'r.-', label='Testing Loss')
+plt.title('Plot Accuracy')
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy')
+plt.legend()
+
+# Save the figure
 plt.savefig(os.path.join(model_save_path, 'losscurves.png'))
+
+# Show the plot
 plt.show()

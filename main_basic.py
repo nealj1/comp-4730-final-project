@@ -1,16 +1,16 @@
 from keras.datasets import cifar100
 from keras.models import Sequential
 from keras.layers import Dense, Flatten, Conv2D, MaxPooling2D
-from keras.losses import sparse_categorical_crossentropy
+from keras.losses import categorical_crossentropy
 from keras.optimizers import Adam
 import matplotlib.pyplot as plt
 
 # Model configuration
 batch_size = 50
 img_width, img_height, img_num_channels = 32, 32, 3
-loss_function = sparse_categorical_crossentropy
+loss_function = categorical_crossentropy
 no_classes = 100
-no_epochs = 25
+no_epochs = 3
 optimizer = Adam()
 validation_split = 0.2
 verbosity = 1
