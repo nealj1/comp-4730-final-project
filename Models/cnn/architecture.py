@@ -2,17 +2,18 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers, Model
 
-
+kernal_size = 3
 
 class Network():
     
     def build(self):
+        # kernal_size = 3
         inputs = layers.Input(shape=(32,32,3)) 
         
-        x = self.conv_block(inputs, num_filters=16, kernel_size=3)
-        x = self.conv_block(x, num_filters=32, kernel_size=3)
-        x = self.conv_block(x, num_filters=64, kernel_size=3)
-        x = self.conv_block(x, num_filters=128, kernel_size=3) 
+        x = self.conv_block(inputs, num_filters=16, kernel_size=kernal_size)
+        x = self.conv_block(x, num_filters=32, kernel_size=kernal_size)
+        x = self.conv_block(x, num_filters=64, kernel_size=kernal_size)
+        x = self.conv_block(x, num_filters=128, kernel_size=kernal_size) 
         x = layers.Flatten()(x)
         outputs = layers.Dense(100, activation="softmax")(x)
         
