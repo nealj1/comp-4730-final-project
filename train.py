@@ -67,9 +67,9 @@ testing_generator = datagen.flow(x_test, y_test, batch_size=64)
 
 
 model.compile(loss='sparse_categorical_crossentropy',
-              optimizer=tf.keras.optimizers.Adam(learning_rate=0.01), metrics='accuracy')
+              optimizer=tf.keras.optimizers.Adam(learning_rate=0.0001), metrics='accuracy')
 
-history = model.fit(x_train, y_train, epochs=50, validation_data=testing_generator, batch_size=128, shuffle=True, callbacks=[early_stopping])
+history = model.fit(x_train, y_train, epochs=250, validation_data=testing_generator, batch_size=128, shuffle=True, callbacks=[early_stopping])
 
 training_loss = history.history["loss"]
 testing_loss = history.history["val_loss"]
