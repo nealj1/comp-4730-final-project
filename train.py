@@ -60,7 +60,7 @@ datagen = ImageDataGenerator(
     # rotation_range=10,
     # zoom_range=0.2
 )
-
+early_stopping = keras.callbacks.EarlyStopping(patience=10, restore_best_weights=True)
 # Create augmented data generator
 train_generator = datagen.flow(x_train, y_train, batch_size=64)
 testing_generator = datagen.flow(x_test, y_test, batch_size=64)
@@ -69,7 +69,7 @@ testing_generator = datagen.flow(x_test, y_test, batch_size=64)
 model.compile(loss='sparse_categorical_crossentropy',
               optimizer=tf.keras.optimizers.Adam(learning_rate=0.01), metrics='accuracy')
 
-history = model.fit(x_train, y_train, epochs=25, validation_data=testing_generator, batch_size=128, shuffle=True)
+history = model.fit(x_train, y_train, epochs=25, validation_data=testing_generator, batch_size=128, shuffle=True, callbacks=[early_stopping])
 
 training_loss = history.history["loss"]
 testing_loss = history.history["val_loss"]
