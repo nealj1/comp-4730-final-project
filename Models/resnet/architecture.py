@@ -26,7 +26,7 @@ class Network():
 
         x =  base_model(x)
         x = GlobalAveragePooling2D()(x)
-        x = Dropout(0.25)(x)
+        x = Dropout(0.50)(x)
         x = Dense(256, activation='relu')(x)
         x = BatchNormalization()(x)
         output = Dense(100, activation='softmax')(x)

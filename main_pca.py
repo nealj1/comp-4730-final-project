@@ -112,7 +112,7 @@ sns.scatterplot(
     hue = "Label",
     palette = sns.color_palette("Set2", as_cmap=True),
     data = principal_cifar_Df,
-    legend = "full",
+    #legend = "full",
     alpha = 1.0
 )
 
