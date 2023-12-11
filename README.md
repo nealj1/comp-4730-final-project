@@ -46,6 +46,6 @@ ssl._create_default_https_context = ssl_create_unverified_context
 ```
 
 # Contributors
-Akshat Sharma <br>
-Justin Neal <br>
-George Kaceli 
+[Akshat Sharma](https://github.com/Cyoger) <br>
+[Justin Neal](https://github.com/nealj1) <br>
+[George Kaceli ](https://github.com/gfkaceli) 
