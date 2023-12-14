@@ -143,6 +143,7 @@ ax.set_title('3D Scatter Plot of CIFAR-100 with PCA')
 
 plt.show()
 
+'''
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.optimizers import RMSprop
@@ -214,3 +215,4 @@ history = model.fit(x_train_flat,
                     epochs = epochs,
                     verbose = 1,
                     validation_data = (x_test_flat, y_test))
+'''

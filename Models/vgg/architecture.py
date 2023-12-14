@@ -35,5 +35,6 @@ class Network():
         outputs = layers.Dense(self.num_classes, activation='softmax')(x)
 
         model = Model(inputs=inputs, outputs=outputs, name="Custom_VGG")
-
+        
+        # The method returns the constructed model.
         return model
